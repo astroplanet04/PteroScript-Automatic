@@ -85,7 +85,7 @@ Activating the security module will:
 ---
 
 ## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the [Issues] page. (https://github.com/astroplanet04/pteroscriot-automatic/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [Issues](https://github.com/astroplanet04/pteroscriot-automatic/issues) page.
 
 ---
 
