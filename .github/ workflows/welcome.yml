@@ -1,0 +1,17 @@
+name: Welcome Bot
+on:
+  issues:
+    types: [opened]
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "👋 Ciao! Grazie per aver segnalato questo problema o suggerito una funzione. Verificherò i log e ti risponderò il prima possibile! 🚀"
+            })
