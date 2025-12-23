@@ -82,17 +82,17 @@ This script implements advanced system optimizations that go beyond a simple ins
 Run the following command as **root** on a fresh server:
 
 ```bash
-bash <(curl -sSL https://raw.githubusercontent.com/tuo-username/ptero-pro/main/ptero-pro-master.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/astroplanet04/pteroscript-automatic/main/pteroscript_automatic.sh)
 ```
 
 ## Manual Installation
 If you prefer to clone the repository:
 
 ```
-git clone https://github.com/tuo-username/ptero-pro.git
+git clone https://github.com/pteroscript-automatic/pteroscript_automatic.git
 cd ptero-pro
-chmod +x ptero-pro-master.sh
-sudo ./ptero-pro-master.sh
+chmod +x pteroscript_automatic.sh
+sudo ./pteroscript_automatic.sh
 ```
 ---
 
