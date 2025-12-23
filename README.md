@@ -8,12 +8,41 @@
 
 ---
 
-## 📝 In breve: Cosa fa questo script?
-- **Installazione Smart:** Configura automaticamente Pannello, Wings e Database (MariaDB).
-- **Ottimizzazione Kernel:** Modifica i parametri di rete Linux (`sysctl`) per gestire migliaia di pacchetti UDP/TCP (ideale per i Game Server).
-- **Sicurezza Avanzata:** Configura automaticamente Firewall (UFW) e protezione brute-force (Fail2Ban).
-- **Database Tuning:** Calcola la RAM del sistema e ottimizza i buffer di MariaDB per la massima velocità.
-- **Manutenzione Pro:** Include tool per backup, aggiornamenti automatici del pannello e notifiche Discord.
+## 📝 At a Glance: What does this script do?
+- **Smart Installation:** Automated configuration of the Panel, Wings agent, and MariaDB database.
+- **Kernel Optimization:** Tunes Linux network parameters (`sysctl`) to efficiently handle high-volume UDP/TCP traffic—ideal for high-performance Game Servers.
+- **Advanced Security:** Out-of-the-box setup for UFW (Uncomplicated Firewall) and proactive brute-force protection via Fail2Ban.
+- **Database Tuning:** Dynamically calculates available system RAM to optimize MariaDB buffer settings for peak database speed.
+- **Pro Maintenance:** A comprehensive toolkit for automated backups, seamless panel updates, and Discord webhook notifications.
+
+---
+## 🛠️ Enterprise-Grade Features & Roadmap
+This script implements advanced system optimizations that go beyond a simple installation. Here is the feature checklist:
+
+### 🚀 Core System & Deployment
+- [x] **Multi-OS Compatibility Check:** Granular verification for Ubuntu 20.04+ and Debian 11+.
+- [x] **Auto-Dependency Management:** Automatic installation of `curl`, `tar`, `unzip`, `git`, and `socat`.
+- [x] **Smart Swap Creation:** Automated 2GB swap file generation to prevent OOM (Out of Memory) crashes.
+- [x] **Interactive TUI:** Professional Text User Interface built with `whiptail`.
+
+### ⚡ Performance & Tuning
+- [x] **Kernel Network Optimization:** Custom `sysctl` settings for high-performance UDP/TCP game traffic.
+- [x] **MariaDB Auto-Scaling:** Dynamic calculation of `innodb_buffer_pool_size` based on total system RAM.
+- [x] **PHP-FPM Tuning:** Optimized process manager settings for faster dashboard responsiveness.
+- [x] **Redis Integration:** Pre-configured caching for lightning-fast panel sessions.
+
+### 🛡️ Security & Hardening
+- [x] **UFW Firewall Automation:** One-click security setup for all Pterodactyl-required ports.
+- [x] **Fail2Ban Proactive Defense:** Custom jails and filters to mitigate brute-force attacks on Nginx.
+- [x] **Directory Hardening:** Automated permission enforcement (Chown/Chmod) across the stack.
+- [ ] **SSL DNS-01 Challenge Support:** (Coming Soon) Support for Cloudflare/DNS-based SSL.
+
+### 🔧 Maintenance & DevOps
+- [x] **One-Click Update Suite:** Automated panel updates directly from GitHub releases.
+- [x] **Docker Health Manager:** Instant pruning of dangling images, old volumes, and massive logs.
+- [x] **Discord Webhook Integration:** Real-time notifications for deployment and maintenance status.
+- [x] **Automated Database Backups:** Local SQL dumps with compression support.
+- [x] **System Health Monitor:** Real-time dashboard for RAM, CPU load, and Disk usage.
 
 ---
 
