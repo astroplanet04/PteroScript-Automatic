@@ -1,0 +1,203 @@
+#!/bin/bash
+
+# ==============================================================================
+# Ptero-Pro Master Utility v2.1
+# High-performance Management & Installation Script for Pterodactyl
+# Designed for Ubuntu 20.04/22.04/24.04 & Debian 11/12
+# ==============================================================================
+
+# --- Configuration & Variables ---
+VERSION="2.1.0"
+LOG_FILE="/var/log/ptero_pro.log"
+PANEL_PATH="/var/www/pterodactyl"
+GITHUB_REPO="https://raw.githubusercontent.com/your-user/ptero-pro/main"
+
+# UI Colors (Whiptail Theme)
+export NEWT_COLORS='
+  root=,blue
+  window=,lightgray
+  border=black,lightgray
+  title=blue,lightgray
+  button=white,blue
+  actbutton=white,red
+  checkbox=black,lightgray
+  actcheckbox=white,blue
+'
+
+# --- Safety & Environment Checks ---
+
+if [[ $EUID -ne 0 ]]; then
+    echo "Error: This script must be run as root."
+    exit 1
+fi
+
+# Ensure whiptail is installed
+if ! command -v whiptail &> /dev/null; then
+    apt-get update && apt-get install -y whiptail
+fi
+
+# --- Helper Functions ---
+
+log_action() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
+
+# 1. System Hardening (Fail2Ban & UFW)
+setup_security() {
+    {
+        echo 20; apt-get install -y ufw fail2ban > /dev/null
+        echo 50; ufw allow 22/tcp; ufw allow 80/tcp; ufw allow 443/tcp; ufw allow 8080/tcp; ufw allow 2022/tcp
+        echo 80; ufw --force enable
+        
+        # Create Fail2Ban Jail for Pterodactyl
+        cat <<EOF > /etc/fail2ban/jail.d/ptero.local
+[nginx-http-auth]
+enabled = true
+filter = nginx-http-auth
+port = http,https
+logpath = /var/log/nginx/error.log
+
+[ptero-panel]
+enabled = true
+port = 80,443
+filter = nginx-botsearch
+logpath = /var/log/nginx/access.log
+maxretry = 5
+EOF
+        systemctl restart fail2ban
+        echo 100
+    } | whiptail --title "Security Hardening" --gauge "Configuring UFW Firewall and Fail2Ban Jails..." 8 60 0
+    whiptail --title "Security" --msgbox "Firewall enabled (Ports 22, 80, 443, 8080, 2022) and Fail2Ban configured." 8 45
+}
+
+# 2. Kernel & Database Tuning
+optimize_system() {
+    {
+        # Network Tuning for Game Traffic (UDP/TCP)
+        echo 30
+        cat <<EOF > /etc/sysctl.d/99-ptero-pro.conf
+net.core.rmem_max=16777216
+net.core.wmem_max=16777216
+net.ipv4.tcp_rmem=4096 87380 16777216
+net.ipv4.tcp_wmem=4096 65536 16777216
+net.ipv4.tcp_slow_start_after_idle=0
+net.ipv4.tcp_tw_reuse=1
+EOF
+        sysctl -p /etc/sysctl.d/99-ptero-pro.conf > /dev/null
+
+        # Database Tuning (MariaDB)
+        echo 60
+        RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+        INNODB_SIZE=$((RAM_KB / 1024 / 4)) # Use 25% of RAM for DB Buffer
+        cat <<EOF > /etc/mysql/mariadb.conf.d/50-ptero-tuning.cnf
+[mysqld]
+innodb_buffer_pool_size = ${INNODB_SIZE}M
+innodb_flush_log_at_trx_commit = 2
+innodb_log_file_size = 128M
+query_cache_limit = 2M
+query_cache_size = 32M
+EOF
+        systemctl restart mariadb 2>/dev/null || true
+        echo 100
+    } | whiptail --title "Optimization" --gauge "Tuning Kernel parameters and MariaDB for performance..." 8 60 0
+}
+
+# 3. Discord Webhook Integration
+test_discord_webhook() {
+    URL=$(whiptail --inputbox "Paste your Discord Webhook URL:" 8 60 3>&1 1>&2 2>&3)
+    if [ ! -z "$URL" ]; then
+        curl -H "Content-Type: application/json" -X POST -d '{"content": "🚀 Ptero-Pro Master: System monitoring connected!"}' "$URL"
+        whiptail --msgbox "Test message sent to Discord." 8 45
+    fi
+}
+
+# 4. Automated Backup
+run_backup() {
+    BACKUP_DIR="/root/ptero_backups"
+    mkdir -p "$BACKUP_DIR"
+    FILE="$BACKUP_DIR/ptero_backup_$(date +%F).tar.gz"
+    
+    {
+        echo 30; tar -czf "$FILE" "$PANEL_PATH" 2>/dev/null
+        echo 70; mysqldump --all-databases > "$BACKUP_DIR/db_dump.sql"
+        echo 100
+    } | whiptail --title "Backup" --gauge "Compressing panel files and exporting database..." 8 60 0
+    whiptail --msgbox "Backup stored at: $FILE" 8 60
+}
+
+# --- Menus ---
+
+maintenance_menu() {
+    M_CHOICE=$(whiptail --title "Maintenance Suite" --menu "Select a tool:" 18 65 8 \
+    "1" "Update Panel (Auto-Release)" \
+    "2" "Fix File Permissions (Storage/Cache)" \
+    "3" "Create Admin User" \
+    "4" "Generate Backup" \
+    "5" "Configure Discord Webhooks" \
+    "6" "Purge Docker Logs & Images" \
+    "7" "Reset MySQL Password" \
+    "8" "Back to Main" 3>&1 1>&2 2>&3)
+
+    case $M_CHOICE in
+        1) 
+            cd $PANEL_PATH && php artisan down
+            curl -L https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz | tar -xzv
+            composer install --no-dev --optimize-autoloader
+            php artisan view:clear && php artisan config:clear
+            php artisan migrate --seed --force
+            chown -R www-data:www-data $PANEL_PATH/* && php artisan up
+            whiptail --msgbox "Panel updated to latest version." 8 45; maintenance_menu ;;
+        2) chown -R www-data:www-data $PANEL_PATH/*; maintenance_menu ;;
+        3) cd $PANEL_PATH && php artisan p:user:make; maintenance_menu ;;
+        4) run_backup; maintenance_menu ;;
+        5) test_discord_webhook; maintenance_menu ;;
+        6) docker system prune -af; maintenance_menu ;;
+        8) main_menu ;;
+    esac
+}
+
+install_menu() {
+    I_CHOICE=$(whiptail --title "Installer" --menu "Pterodactyl 1.x Installation:" 15 60 4 \
+    "1" "Full Installation (Recommended)" \
+    "2" "Install Panel Only" \
+    "3" "Install Wings Only" \
+    "4" "Back" 3>&1 1>&2 2>&3)
+
+    case $I_CHOICE in
+        1) optimize_system; setup_security; bash <(curl -s https://pterodactyl-installer.se) <<EOF
+2
+EOF
+        ;;
+        2) bash <(curl -s https://pterodactyl-installer.se) <<EOF
+0
+EOF
+        ;;
+        3) bash <(curl -s https://pterodactyl-installer.se) <<EOF
+1
+EOF
+        ;;
+        4) main_menu ;;
+    esac
+}
+
+main_menu() {
+    CHOICE=$(whiptail --title "Ptero-Pro v$VERSION" --menu "System Management:" 15 65 5 \
+    "1" "🚀 Installation Wizard" \
+    "2" "🔧 Maintenance & Utility" \
+    "3" "🛡️  Security & Hardening" \
+    "4" "📈 System Performance Tuning" \
+    "5" "EXIT" 3>&1 1>&2 2>&3)
+
+    case $CHOICE in
+        1) install_menu ;;
+        2) maintenance_menu ;;
+        3) setup_security; main_menu ;;
+        4) optimize_system; main_menu ;;
+        5) clear; exit 0 ;;
+    esac
+}
+
+# Initial Welcome
+whiptail --title "Ptero-Pro Master" --msgbox "Welcome to the Ultimate Pterodactyl Manager.\n\nThis tool will help you install, secure and optimize your server.\n\nPress OK to start." 12 60
+
+main_menu
