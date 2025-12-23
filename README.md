@@ -35,7 +35,7 @@ This script implements advanced system optimizations that go beyond a simple ins
 - [x] **UFW Firewall Automation:** One-click security setup for all Pterodactyl-required ports.
 - [x] **Fail2Ban Proactive Defense:** Custom jails and filters to mitigate brute-force attacks on Nginx.
 - [x] **Directory Hardening:** Automated permission enforcement (Chown/Chmod) across the stack.
-- [ ] **SSL DNS-01 Challenge Support:** (Coming Soon) Support for Cloudflare/DNS-based SSL.
+- [] **SSL DNS-01 Challenge Support:** (Coming Soon) Support for Cloudflare/DNS-based SSL.
 
 ### 🔧 Maintenance & DevOps
 - [x] **One-Click Update Suite:** Automated panel updates directly from GitHub releases.
