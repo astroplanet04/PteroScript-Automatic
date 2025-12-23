@@ -14,7 +14,7 @@ A clear and concise description of what the bug is.
 - Virtualization: (KVM, Dedicated, etc.)
 
 **Error Logs**
-If applicable, paste the content of `/var/log/ptero_pro.log` here:
+If applicable, paste the content of `/var/log/pteroscript_automatic.log` here:
 ```bash
 # Paste logs here
 ```
