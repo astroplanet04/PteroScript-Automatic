@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # ==============================================================================
-# Ptero-Pro Master Utility v2.1
+# PteroScript-Automatic Master Utility v2.1
 # High-performance Management & Installation Script for Pterodactyl
 # Designed for Ubuntu 20.04/22.04/24.04 & Debian 11/12
 # ==============================================================================
 
 # --- Configuration & Variables ---
 VERSION="2.1.0"
-LOG_FILE="/var/log/ptero_pro.log"
+LOG_FILE="/var/log/pteroscript_automatic.log"
 PANEL_PATH="/var/www/pterodactyl"
-GITHUB_REPO="https://raw.githubusercontent.com/your-user/ptero-pro/main"
+GITHUB_REPO="https://raw.githubusercontent.com/your-user/pteroscript_automatic/main"
 
 # UI Colors (Whiptail Theme)
 export NEWT_COLORS='
@@ -75,7 +75,7 @@ optimize_system() {
     {
         # Network Tuning for Game Traffic (UDP/TCP)
         echo 30
-        cat <<EOF > /etc/sysctl.d/99-ptero-pro.conf
+        cat <<EOF > /etc/sysctl.d/99-pteroscript-automatic.conf
 net.core.rmem_max=16777216
 net.core.wmem_max=16777216
 net.ipv4.tcp_rmem=4096 87380 16777216
@@ -83,7 +83,7 @@ net.ipv4.tcp_wmem=4096 65536 16777216
 net.ipv4.tcp_slow_start_after_idle=0
 net.ipv4.tcp_tw_reuse=1
 EOF
-        sysctl -p /etc/sysctl.d/99-ptero-pro.conf > /dev/null
+        sysctl -p /etc/sysctl.d/99-pteroscript-automatic.conf > /dev/null
 
         # Database Tuning (MariaDB)
         echo 60
@@ -106,7 +106,7 @@ EOF
 test_discord_webhook() {
     URL=$(whiptail --inputbox "Paste your Discord Webhook URL:" 8 60 3>&1 1>&2 2>&3)
     if [ ! -z "$URL" ]; then
-        curl -H "Content-Type: application/json" -X POST -d '{"content": "🚀 Ptero-Pro Master: System monitoring connected!"}' "$URL"
+        curl -H "Content-Type: application/json" -X POST -d '{"content": "🚀 PteroScript-Automatic Master: System monitoring connected!"}' "$URL"
         whiptail --msgbox "Test message sent to Discord." 8 45
     fi
 }
@@ -181,7 +181,7 @@ EOF
 }
 
 main_menu() {
-    CHOICE=$(whiptail --title "Ptero-Pro v$VERSION" --menu "System Management:" 15 65 5 \
+    CHOICE=$(whiptail --title "PteroScript-Automatic v$VERSION" --menu "System Management:" 15 65 5 \
     "1" "🚀 Installation Wizard" \
     "2" "🔧 Maintenance & Utility" \
     "3" "🛡️  Security & Hardening" \
@@ -198,6 +198,6 @@ main_menu() {
 }
 
 # Initial Welcome
-whiptail --title "Ptero-Pro Master" --msgbox "Welcome to the Ultimate Pterodactyl Manager.\n\nThis tool will help you install, secure and optimize your server.\n\nPress OK to start." 12 60
+whiptail --title "PteroScript-Automatic Master" --msgbox "Welcome to the Ultimate Pterodactyl Manager.\n\nThis tool will help you install, secure and optimize your server.\n\nPress OK to start." 12 60
 
 main_menu
